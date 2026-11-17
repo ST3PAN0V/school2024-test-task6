@@ -1,57 +1,80 @@
-# Тестовое задание для отбора на Летнюю ИТ-школу КРОК по разработке
+# Workload Imbalance Report
 
-## Условие задания
-Будучи сотрудником департамента внутренней автоматизации одной IT компании, вы занимаетесь разработкой и интеграцией различных решений с целью автоматизации различных внутренних бизнес процессов компании. Так, например, в свое время в вашем департаменте была разработана система учета проектных трудозатрат.
+A C++17 command-line solution to the **2024 CROC Summer IT School selection task**. It reads weekly time entries and reports employees whose recorded hours differ from the weekly target by more than 10%.
 
-Идеологически такая система содержит функциональность по вводу и работе со сведениями о проектах и, самое главное, управление фактическими трудозатратами – списаниями времени. Это значит, что при выполнении той или иной проектной задачи сотрудник фиксирует затраченное на решение задачи время в данной системе. В результате менеджмент проектов может оценивать потраченное время и, как следствие, деньги на реализацию проекта: по задачам, этапам и любому другому уровню детализации.
+**Solution author:** Artem Alekseevich Stepanov (Степанов Артём Алексеевич), [ST3PAN0V](https://github.com/ST3PAN0V).
 
-Что еще важно знать о списаниях времени. У каждого сотрудника компании есть норма списания - количество времени, которое необходимо списывать за рабочий день. В общем случае (и в рамках задачи делаем допущение, что во всех случаях) такая норма составляет 8 часов в день. Однако сотрудники по тем или иным причинам могут списывать как больше 8 часов, так и меньше, в результате чего образуется дизбаланс. 
+## Task
 
-В первом случае можно говорить о том, что сотрудник перегружен или тратит на задачи больше времени, чем планируется, но, желая успеть в срок, задерживается на работе. Во втором случае причиной может быть как простой (отсутствие задач), так и недоработки со стороны самого сотрудника. 
+A time-tracking system exports a weekly `report.txt`. The first line contains the target hours per employee; each following line contains one time entry in the TSR-3 format:
 
-Дизбаланс списаний стал серьезно волновать руководителей производственных департаментов, поэтому было принято решение на регулярной основе мониторить дизбаланс и принимать соответствующие меры. Однако за неимением такого отчета в системе, руководство департамента обратилось к вам с просьбой реализовать MVP подобного отчета.
-
-На текущий момент система управления содержит функцию выгрузки списаний “TSR-3” (присвоенный отчету код) за указанный период в следующем формате:
-
-"_<id сотрудника в формате UUID> <Фамилия> <Имя> <Отчество> <Дата списания в формате dd.MM.YYYY> <количество часов>_"
-
-При этом стоит учесть, что количество списаний сотрудником не ограничивается. Так, например, файл может выглядеть следующим образом:
-```
-a30b4d51-11b4-49b2-b356-466e92a66df7 Иванов Иван Иванович 16.05.2024 4
-0f0ccd5e-cd46-462a-b92d-69a6ff147465 Петров Алексей Сергеевич 16.05.2024 6
-a30b4d51-11b4-49b2-b356-466e92a66df7 Иванов Иван Иванович 16.05.2024 2.5
-0f0ccd5e-cd46-462a-b92d-69a6ff147465 Петров Алексей Сергеевич 16.05.2024 2
-a30b4d51-11b4-49b2-b356-466e92a66df7 Иванов Иван Иванович 16.05.2024 1.5
+```text
+<employee UUID> <last name> <first name> <patronymic> <dd.MM.YYYY> <hours>
 ```
 
-По данному примеру видно, что оба сотрудника (Петров А.С. и Иванов И.И.) списали за 16 мая каждый по 8 часов, но, скорее всего, в разные задачи.
+Multiple entries may belong to the same employee. The program totals the hours and writes employees outside the allowed range to `result.txt`:
 
-Вам же необходимо разработать программу для анализа дизбаланса, технические требования к разработке которой содержат следующее:
-1. На вход программа для анализа получает файл со списаниями report.txt за конкретную рабочую неделю. О формате файла известно следующее:
-    - в первой строке файла указывается недельная норма списания на одного сотрудника (из расчета дневной нормы списания, равной 8 часам; например, 40 для пятидневной рабочей недели);
-    - во всех последующих строках файла указывается перечень списаний сотрудников в формате отчета “TSR-3”. 
-2. Программа определяет сотрудников, у которых дизбаланс списаний времени за неделю составляет более 10% в обе стороны;
-3. Найденные сотрудники с дизбалансом по итогам работы программы записываются в текстовый файл result.txt в следующем виде:
-  "_<Фамилия И.О.> <количество часов, составляющих дизбаланс, с указанием знака>_".
-  Количество часов дизбаланса сопровождается знаками “+” и “–” в соответствии со следующими условиями:
-    - для часов, которые идут сверх нормы, ставится знак “+”;
-    - для часов, недостающих до нормы, ставится знак “–”.
-4. В выходном файле сначала перечисляются сотрудники с отрицательным дизбалансом в алфавитном порядке, затем - сотрудники с положительным дизбалансом в алфавитном порядке.
-5. Ручной ввод пути к файлу через интерактивный режим (посредством клавиатурного ввода) недопустим. Также эксплуатация программы не должна подразумевать какие-либо изменения программного кода с целью указания пути к файлам.
+```text
+<last name> <first initial>.<patronymic initial>. <signed difference from target>
+```
 
-Примеры входного и выходного файлов приложены к настоящему техническому заданию.
+Employees below the target appear first, followed by those above it. Each group is ordered lexicographically by name. Exactly 10% deviation is within the allowed range.
 
-## Автор решения
-ФИО: Степанов Артём Алексеевич
-Дата рождения: 01.12.2004
+For a 40-hour target, totals below 36 or above 44 are included. The reported difference is measured from 40 hours, not from the tolerance boundary.
 
-## Описание реализации
-Программа считывает данные из report.txt и записывает их в std::map(я выбрал эту структуры, потому что она автоматически будет сортировать сотрудников в лексикографическом(алфавитном) порядке). Так как это за конкретую рабочую неделю, даты нас не интересуют.
-Далее программа 2 раза пробегается по сформированному и отсортированному map. На первом пробеге, программа ищет сотрудников с отрицательным отклонением и сразу записывает их в result.txt. На втором ищет с положительным отклонением и так же записывает их в result.txt.
+## Implementation
 
-## Инструкция по сборке и запуску решения
-1. Для сборки проекта необходимо перейти из текущей директории в build_release. (комманда bash: $ сd ./build_release)
-2. Далее нужно собрать проект (комманда bash: $ сmake --build .)
-3. После успешной сборки нужно запустить исполняемый файл (комманда bash: $ ./Imbalance_monitoring)
-4. **_PROFIT!1!_**
+- C++17 and the standard library, built with CMake.
+- File-based input and output; no interactive prompts.
+- Aggregation through `std::map<Employee, float>`.
+- Two passes over the ordered results: negative deviations, then positive deviations.
+- UTF-8 name conversion to produce Cyrillic initials.
 
+| Path | Purpose |
+| --- | --- |
+| [src/main.cpp](src/main.cpp) | Entry point and exception reporting |
+| [src/tools.cpp](src/tools.cpp) | Parsing, aggregation, filtering, and output formatting |
+| [src/tools.h](src/tools.h) | Data types, file paths, and the 10% threshold |
+| [report.txt](report.txt) | Sample input |
+| [result.txt](result.txt) | Sample output, overwritten when the program runs |
+| [CMakeLists.txt](CMakeLists.txt) | Build configuration |
+
+## Build
+
+Requirements: a C++17 compiler, CMake 3.11 or newer, and a system with the **`ru_RU.UTF-8` locale installed**. The program constructs that locale explicitly; changing a shell environment variable alone does not install it.
+
+The repository contains older build directories. Create a fresh directory so CMake can configure paths for your machine:
+
+```bash
+git clone https://github.com/ST3PAN0V/school2024-test-task6.git
+cd school2024-test-task6
+mkdir -p build-local
+cd build-local
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build .
+```
+
+## Run
+
+Run from the build directory created above:
+
+```bash
+./Imbalance_monitoring
+cat ../result.txt
+```
+
+The program reads `../report.txt` and writes `../result.txt`, relative to its **working directory**. It does not accept file paths as command-line arguments. Running it replaces the output file.
+
+To use another report, place it at `report.txt` in the repository root, keeping the format described above.
+
+## Check the result
+
+No automated test suite is included. Use the supplied report as a sample, inspect the output, and check stderr for errors. The entry point catches exceptions and still returns `0`, so the process exit status alone is not a reliable success check.
+
+Useful boundary cases are a total exactly at the target, totals exactly 10% above or below it, and totals just outside that range.
+
+## Current scope
+
+This is a selection-task solution for a report that already covers one working week. Dates are read but are not used to filter the data.
+
+The current map comparison uses the employee's full name rather than UUID. Distinct employees with identical full names would therefore be grouped together. File paths and the tolerance are defined in `src/tools.h`, and the parser expects well-formed input.
